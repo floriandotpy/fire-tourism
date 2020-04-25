@@ -9,7 +9,7 @@ Tourism tags: {'aquarium', 'yes', 'chalet', 'alpine_hut', 'motel', 'attraction',
 # Introduction docs: https://github.com/osmcode/pyosmium/blob/master/doc/intro.rst
 import osmium
 import pandas as pd
-
+import sys
 
 class TourismCounterHandler(osmium.SimpleHandler):
     def __init__(self):
@@ -20,8 +20,56 @@ class TourismCounterHandler(osmium.SimpleHandler):
 
         # track how many data points we currently still ignore
         self.num_uncounted = 0
+
+        self.tags = set()  # all possible tags found in the data 
+        
+        # tags we consider touristic
+        self.tags_tourism = {'tourism'}
+        
+          # tags we consider human activity, but not touristic
+        self.tags_non_tourism = {
+            'cinema',
+            'toilets',
+            'playground',
+            'memorial',
+            'recycling',
+            'shop', 
+            'school',
+            'highway',
+            'fire_hydrant',
+            'post_box',
+            'railway',
+            'route', 
+            'wholesale',
+            'agricultural',
+            'healthcare',
+            'station',
+            'ferry',
+            'police',
+            'sport',
+            'takeaway',
+            'preschool',
+            'vending',
+            'service',
+            'health_facility',
+            'railway',
+            'cargo',
+            'transportation',
+            'toilets',
+            'place',
+            'kids_area',
+            'townhall',
+            'clinic',
+            'building',
+            'club',
+            'community_centre'}
         
     def node(self, node):
+
+        # gather all raw tags from dataset, even though we filter out many of these
+        for type_, subtype_ in node.tags:
+            self.tags.add(type_)
+
         tourism_tag = node.tags.get('tourism')
 
         # TODO: also add non-tourism nodes, but determine their type and subtype correctly
@@ -30,6 +78,17 @@ class TourismCounterHandler(osmium.SimpleHandler):
             node_subtype = tourism_tag
             point = (node.location.lat, node.location.lon, node_type, node_subtype)
             self.geo_points.append(point)
+        else:
+            pass
+            # self.tags.update(node.tags)
+
+            
+
+            # print(node.tags)
+            # print(len(node.tags))
+            # print(dir(node.tags))
+            # print(type(node.tags))
+            # sys.exit()
 
     def way(self, w):
         # TODO: include ways by finding a mean location or something
@@ -58,6 +117,7 @@ def get_tourist_activity(lat, lng, when, radius=5):
 
 
 def load(fname):
+    print(f"Loading {fname}")
     h = TourismCounterHandler()
 
     h.apply_file(fname, 
@@ -66,9 +126,10 @@ def load(fname):
 
     print(f"Number of tourism nodes: {len(h.geo_points)}")
     print(f"Uncounted tourism locations: {h.num_uncounted}")
+    print(f"Tags: {h.tags}")
 
     return h
 
 
 if __name__ == "__main__":
-    load('../data/galicia.osm.pbf')
+    load('data/galicia.osm.pbf')
