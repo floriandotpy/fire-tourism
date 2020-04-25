@@ -1,6 +1,7 @@
-import rasterio as rio
 import numpy as np
-import pyproj
+import rasterio as rio # for dataset reading
+import pyproj # for projection stuff
+from affine import Affine # class for transform matrices
 
 from typing import List, Tuple
 
