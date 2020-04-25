@@ -9,7 +9,7 @@ def get_subdataset_path(src_filepath: str, i: int) -> str:
     return sds_path
 
 
-def write_list(l:list, fpath:str) -> None:
+def write_lines(l: List[str], fpath:str) -> None:
     """
     Args:
         l: list to write to fpath
@@ -24,7 +24,7 @@ def write_list(l:list, fpath:str) -> None:
             f.write("%s\n" % elem)
 
             
-def read_lines(fpath:str) -> List[str]:
+def read_lines(fpath: str) -> List[str]:
     """
     Reads lines from file as text and returns
     these as a list.

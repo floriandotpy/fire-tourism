@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime
 from urllib.request import urlopen
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
@@ -14,7 +15,8 @@ from typing import List, Set, Dict, Tuple, Optional, Union, Any
 import fire.utils.etc as uetc
 import fire.utils.io as uio
 
-def collect_hyperlinks(page_url:str) -> List[str]:
+
+def collect_hyperlinks(page_url: str) -> List[str]:
     """
     Gets all URLs from hyperlinks (a href) on a given webpage.
     
@@ -40,6 +42,8 @@ def collect_hdf_urls_from_lpdaac(
     product_root_url : str, 
     hdf_regex  : str = r"\.hdf$",
     date_regex : str = r"/\d{4}\.\d{2}\.\d{2}/?$",
+    min_date : Optional[datetime] = None,
+    max_date : Optional[datetime] = None,
     verbose : bool = True
 ) -> List[str]:
     """
@@ -61,6 +65,10 @@ def collect_hdf_urls_from_lpdaac(
             all the pages for hdf-files.
         verbose:
             Whether or not to show a progress bar.
+        min_date, max_date (datetime): Dates to use for filtering
+            which directories to fetch. Not too accurate, since
+            the dates are usually only the start dates of the 8-day
+            hdf files. 
             
     Returns:
         List (of str) of URLs pointing to hdf-files.
@@ -72,6 +80,14 @@ def collect_hdf_urls_from_lpdaac(
     date_urls = collect_hyperlinks(product_root_url)
     date_urls = [u for u in date_urls 
                  if uetc.like(u, date_regex)]
+
+    if min_date:
+        date_urls = [u for u in date_urls 
+                     if _get_dir_date_from_lpdaac_url(u) >= min_date]
+
+    if max_date:
+        date_urls = [u for u in date_urls 
+                     if _get_dir_date_from_lpdaac_url(u) <= max_date]
     
     if verbose:
         progr = uetc.ProgressDisplay(len(date_urls))\
@@ -87,6 +103,10 @@ def collect_hdf_urls_from_lpdaac(
         progr.stop()
     
     return hdf_urls
+
+def _get_dir_date_from_lpdaac_url(url: str) -> datetime:
+    date_str = uetc.extract(url, r"[12][0-9]{3}\.[01][0-9]\.[0-3][0-9]")
+    return datetime.strptime(date_str, r"%Y.%m.%d")
     
     
 def fetch_hdf_files_from_lpdaac(urls: List[str],
