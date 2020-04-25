@@ -1,3 +1,4 @@
 osmium  # read pbf files from open street map dataset
 jupyter
 matplotlib
+pandas
