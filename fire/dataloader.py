@@ -19,15 +19,21 @@ import matplotlib as mpl
 import fire.utils.modis as um
 import fire.utils.io as uio
 import fire.utils.geo as ugeo
+from fire.utils.etc import ProgressDisplay
 
 
 
 def get_fires(files: List[str]) -> pd.DataFrame:
     all_dfs = list()
+
+    progress = ProgressDisplay(len(files))
+    progress.start_timer()
     for f in files:
         firemask_sds_path = uio.get_subdataset_path(f, 0)
         all_dfs.append(_get_fires_from_single_subdataset(firemask_sds_path))
+        progress.update_and_print()
 
+    progress.stop()
     return pd.concat(all_dfs, axis=0).reset_index(drop=True)
 
 
