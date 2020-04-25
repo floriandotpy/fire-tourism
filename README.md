@@ -16,7 +16,7 @@ $ python -V
 Python 3.7.7
 ```
 5. Install dependencies `pip install -r requirements.txt`
-6. Install dependencies that are better installed via conda `conda install --file requirements_via_conda.txt`
+6. Install dependencies that are better installed via conda `conda install -c conda-forge --file requirements_via_conda.txt`
 
 You're now set to go.
 

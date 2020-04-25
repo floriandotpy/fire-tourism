@@ -1,1 +1,3 @@
 cartopy # for maplotlib plots of maps with correct projection
+rasterio # reads geo data files, e.g. MOD14A1 hdf files
+scikit-learn # machine learning library
