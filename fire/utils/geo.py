@@ -3,7 +3,7 @@ import rasterio as rio # for dataset reading
 import pyproj # for projection stuff
 from affine import Affine # class for transform matrices
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 # CONSTANTS
 CRS_LATLON = pyproj.CRS.from_epsg(4326)
@@ -39,7 +39,7 @@ def get_coords_for_pixels(dataset: rio.DatasetReader,
     src_crs: pyproj.crs.CRS = pyproj.CRS.from_wkt(dataset.crs.to_wkt())
     
     # get coordinates of pixel ijs in src projection
-    src_xs, src_ys = rio.transform.xy(rio_mod_sds.transform, rows, cols)
+    src_xs, src_ys = rio.transform.xy(dataset.transform, rows, cols)
     src_xs, src_ys = np.array(src_xs), np.array(src_ys)
     
     # reproject coordinates to destination CRS (projection)
