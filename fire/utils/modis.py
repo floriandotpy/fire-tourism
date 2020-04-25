@@ -1,13 +1,16 @@
 """
 Functions for processing MODIS hdf files and filenames
 """
-
-import numpy as np
-from fire.utils.etc import max_precision, extract
 import os
 import datetime
 import warnings
 
+from typing import List, Tuple, Optional
+
+import numpy as np
+import pandas as pd
+
+from fire.utils.etc import max_precision, extract
 
 # CONSTANTS
 # ----------------------------------------------------
@@ -145,10 +148,10 @@ def meta_from_hdf_filename(hdf_fname:str) -> dict:
             "v"        : int : vertical tile number
     """
     meta = {
-        "sat_name": _sat_name_from_hdf_filename(hdf_fname),
-        "date"    : _date_from_hdf_filename(hdf_fname),
-        "h"       : _h_from_hdf_filename(hdf_fname),
-        "v"       : _v_from_hdf_filename(hdf_fname)
+        "sat_name": sat_name_from_hdf_filename(hdf_fname),
+        "date"    : date_from_hdf_filename(hdf_fname),
+        "h"       : h_from_hdf_filename(hdf_fname),
+        "v"       : v_from_hdf_filename(hdf_fname)
     }
     
     return meta
@@ -193,3 +196,18 @@ def default_target_path_scheme(url:str, data_root_path:str) -> str:
     url_from_product_on = extract(url, product_name + r".+[/\\].+")
     target_path         = os.path.join(data_root_path, url_from_product_on)
     return target_path
+
+
+def make_hdf_index_from_paths(hdf_paths: List[str], 
+                              path_col_name: str = "url"
+                             ) -> pd.DataFrame:
+    hdf_index = ( pd
+        .DataFrame({path_col_name: hdf_paths})
+        .assign(fname      = lambda df: df.url.apply(os.path.basename),
+                sat_name   = lambda df: df.fname.apply(sat_name_from_hdf_filename),
+                fname_date = lambda df: df.fname.apply(date_from_hdf_filename),
+                h          = lambda df: df.fname.apply(h_from_hdf_filename),
+                v          = lambda df: df.fname.apply(v_from_hdf_filename)
+        )
+    )
+    return hdf_index
