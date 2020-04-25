@@ -35,10 +35,10 @@ class TourismCounterHandler(osmium.SimpleHandler):
             'recycling',
             'shop', 
             'school',
-            # 'highway',
             'fire_hydrant',
             'post_box',
             # 'railway',
+            # 'highway',
             'route', 
             'wholesale',
             'agricultural',
@@ -67,9 +67,8 @@ class TourismCounterHandler(osmium.SimpleHandler):
     def node(self, node):
 
         # gather all raw tags from dataset, even though we filter out many of these
-        # for type_, subtype_ in node.tags:
-        #     self.tags.add(type_)
-
+        for type_, subtype_ in node.tags:
+            self.tags.add(type_)
 
         node_type = node_subtype = None
 
@@ -94,12 +93,6 @@ class TourismCounterHandler(osmium.SimpleHandler):
             point = (node.location.lat, node.location.lon, node_type, node_subtype)
             self.geo_points.append(point)
 
-        # print(node.tags)
-        # print(len(node.tags))
-        # print(dir(node.tags))
-        # print(type(node.tags))
-        # sys.exit()
-
     def way(self, w):
         # TODO: include ways by finding a mean location or something
         if w.tags.get('tourism'):
@@ -118,7 +111,6 @@ class TourismCounterHandler(osmium.SimpleHandler):
                             columns=['lat', 'lon', 'type', 'subtype'])
 
 
-
 def get_tourist_activity(lat, lng, when, radius=5):
     """
     Determine the tourism activity at a given location.
@@ -134,7 +126,7 @@ def load(fname):
                  locations=True,  # enable processing geometries of ways and areas
                  idx='flex_mem')  # cache that works for mid-sized data. Won;t be enough for Europe or planet
 
-    print(f"Number of tourism nodes: {len(h.geo_points)}")
+    print(f"Number of nodes: {len(h.geo_points)}")
     print(f"Uncounted tourism locations: {h.num_uncounted}")
     print(f"Tags: {h.tags}")
 
