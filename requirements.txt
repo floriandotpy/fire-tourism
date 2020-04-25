@@ -2,3 +2,6 @@ osmium  # read pbf files from open street map dataset
 jupyter
 matplotlib
 pandas
+numpy
+rasterio # reads geo data files, e.g. MOD14A1 hdf files
+pyproj # for projection stuff (coordinates to lat lon etc)
