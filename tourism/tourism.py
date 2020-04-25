@@ -56,4 +56,4 @@ def load(fname):
 
 
 if __name__ == "__main__":
-    load('data/galicia.osm.pbf')
+    load('../data/galicia.osm.pbf')
