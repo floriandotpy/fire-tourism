@@ -5,4 +5,3 @@ pandas
 numpy
 rasterio # reads geo data files, e.g. MOD14A1 hdf files
 pyproj # for projection stuff (coordinates to lat lon etc)
-cartopy # for maplotlib plots of maps with correct projection
