@@ -24,7 +24,7 @@ class TourismCounterHandler(osmium.SimpleHandler):
         self.tags = set()  # all possible tags found in the data 
         
         # tags we consider touristic
-        self.tags_tourism = {'tourism'}
+        self.tag_tourism = 'tourism'
         
           # tags we consider human activity, but not touristic
         self.tags_non_tourism = {
@@ -35,10 +35,10 @@ class TourismCounterHandler(osmium.SimpleHandler):
             'recycling',
             'shop', 
             'school',
-            'highway',
+            # 'highway',
             'fire_hydrant',
             'post_box',
-            'railway',
+            # 'railway',
             'route', 
             'wholesale',
             'agricultural',
@@ -67,28 +67,38 @@ class TourismCounterHandler(osmium.SimpleHandler):
     def node(self, node):
 
         # gather all raw tags from dataset, even though we filter out many of these
-        for type_, subtype_ in node.tags:
-            self.tags.add(type_)
+        # for type_, subtype_ in node.tags:
+        #     self.tags.add(type_)
 
-        tourism_tag = node.tags.get('tourism')
 
-        # TODO: also add non-tourism nodes, but determine their type and subtype correctly
+        node_type = node_subtype = None
+
+        # Case A: Tourism Node
+        tourism_tag = node.tags.get(self.tag_tourism)
         if tourism_tag:
             node_type = 'tourism'
             node_subtype = tourism_tag
+
+        # Case B: Non-tourism node
+        else:
+            for tag in self.tags_non_tourism:
+                tag_value = node.tags.get(tag)
+                if tag_value:
+                    node_type = tag
+                    node_subtype = tag_value
+
+                    # so that we do not add a single location twice (it may have multiple tags)
+                    break  
+        
+        if node_type:
             point = (node.location.lat, node.location.lon, node_type, node_subtype)
             self.geo_points.append(point)
-        else:
-            pass
-            # self.tags.update(node.tags)
 
-            
-
-            # print(node.tags)
-            # print(len(node.tags))
-            # print(dir(node.tags))
-            # print(type(node.tags))
-            # sys.exit()
+        # print(node.tags)
+        # print(len(node.tags))
+        # print(dir(node.tags))
+        # print(type(node.tags))
+        # sys.exit()
 
     def way(self, w):
         # TODO: include ways by finding a mean location or something
