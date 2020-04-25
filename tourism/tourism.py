@@ -8,20 +8,28 @@ Tourism tags: {'aquarium', 'yes', 'chalet', 'alpine_hut', 'motel', 'attraction',
 # Library for loading open street map data
 # Introduction docs: https://github.com/osmcode/pyosmium/blob/master/doc/intro.rst
 import osmium
+import pandas as pd
 
 
 class TourismCounterHandler(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
-        self.num_nodes = 0
-        self.num_uncounted = 0
-        self.tourism_tags = set()
-        self.tourism_points = []
+        
+        # collect geo points while traversing through the loaded data
+        self.geo_points = []
 
+        # track how many data points we currently still ignore
+        self.num_uncounted = 0
+        
     def node(self, node):
-        if node.tags.get('tourism'):
-            point = (node.location.lat, node.location.lon)
-            self.tourism_points.append(point)
+        tourism_tag = node.tags.get('tourism')
+
+        # TODO: also add non-tourism nodes, but determine their type and subtype correctly
+        if tourism_tag:
+            node_type = 'tourism'
+            node_subtype = tourism_tag
+            point = (node.location.lat, node.location.lon, node_type, node_subtype)
+            self.geo_points.append(point)
 
     def way(self, w):
         # TODO: include ways by finding a mean location or something
@@ -32,6 +40,13 @@ class TourismCounterHandler(osmium.SimpleHandler):
         # TODO: include relation by finding a mean location or something
         if r.tags.get('tourism'):
             self.num_uncounted += 1
+
+    def get_dataframe(self):
+        """
+        Return a pandas dataframe of the aggregated geo data
+        """
+        return pd.DataFrame(data=self.geo_points,
+                            columns=['lat', 'lon', 'type', 'subtype'])
 
 
 
@@ -49,8 +64,8 @@ def load(fname):
                  locations=True,  # enable processing geometries of ways and areas
                  idx='flex_mem')  # cache that works for mid-sized data. Won;t be enough for Europe or planet
 
-    print("Number of tourism nodes: {}".format(len(h.tourism_points)))
-    print("Uncounted tourism locations %d" % h.num_uncounted)
+    print(f"Number of tourism nodes: {len(h.geo_points)}")
+    print(f"Uncounted tourism locations: {h.num_uncounted}")
 
     return h
 
