@@ -134,4 +134,21 @@ def load(fname):
 
 
 if __name__ == "__main__":
-    load('data/galicia.osm.pbf')
+    for region in ['asturias', 
+                   'castilla_y_leon',
+                   'galicia', 
+                   'myanmar',
+                   'california']:
+
+        path_from = f'data/{region}.osm.pbf'
+        path_to = f'tourism/data_{region}.csv'
+
+        print(f"Loading from: {path_from}")
+
+        handler = load(path_from)
+
+        print(f"Writing to: {path_to}")
+
+        df = handler.get_dataframe()
+        df.to_csv(path_to)
+
