@@ -7,6 +7,7 @@ from typing import List, Tuple, Optional
 
 # geo stuff
 import rasterio as rio # for dataset reading
+from rasterio.errors import RasterioIOError
 import pyproj # for projection stuff
 from affine import Affine # class for transform matrices
 
@@ -29,8 +30,11 @@ def get_fires(files: List[str]) -> pd.DataFrame:
     progress = ProgressDisplay(len(files))
     progress.start_timer()
     for f in files:
-        firemask_sds_path = uio.get_subdataset_path(f, 0)
-        all_dfs.append(_get_fires_from_single_subdataset(firemask_sds_path))
+        try:
+            firemask_sds_path = uio.get_subdataset_path(f, 0)
+            all_dfs.append(_get_fires_from_single_subdataset(firemask_sds_path))
+        except RasterioIOError:
+            print(f"File {f} could not be read.")
         progress.update_and_print()
 
     progress.stop()
